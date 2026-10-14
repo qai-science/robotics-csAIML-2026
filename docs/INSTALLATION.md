@@ -157,7 +157,7 @@ python gas_explorer.py --duration 10 --fast --truth-out /tmp/selftest_truth.csv
 ```
 
 You should see the room and the gas clouds appear in CoppeliaSim, the robot drive for 10 s, and
-`[base] run finished: 51 readings saved to /tmp/selftest.xlsx`.
+`[base] run finished: 50 readings saved to /tmp/selftest.xlsx`.
 
 ---
 
