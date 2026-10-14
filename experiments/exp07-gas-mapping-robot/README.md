@@ -123,6 +123,7 @@ separate base station.
 | `base_station.py` | TCP server; logs readings to `results/gas_log.xlsx` (+ CSV) in real time |
 | `gas_explorer.py` | Builds the scene, drives the robot, reads the sensors, streams the data |
 | `analyse.py` | Reads the Excel log and makes the figures and `summary.json` |
+| `run_experiment.sh` | Runs the whole experiment with one command (section 9.1) |
 | `results/` | Data and figures from our run (yours will overwrite them) |
 
 ## 6. System architecture
@@ -166,74 +167,143 @@ separate base station.
 | **Controlled variables** | room and leak layout, robot speed 0.32 m/s, sample rate 5 Hz, run time 120 s, lawnmower path, random seeds |
 | **Reference** | true concentration at the inlet, saved by the robot in `robot_truth.csv` (the base station never sees it) |
 
-## 9. Procedure — step by step
+## 9. Procedure — step by step (Ubuntu, using the Terminal)
 
-> Run every command from this folder:
-> `cd ~/robotics-csAIML-2026/experiments/exp07-gas-mapping-robot`
-> and activate the environment first: `source ~/sim-venv/bin/activate`
+Everything below is typed into the **Terminal on the Ubuntu machine itself**. There is no second
+computer and no SSH: CoppeliaSim, the robot program and the base station all run on the same
+Ubuntu PC. (The robot program still talks to CoppeliaSim through its built-in local link on port
+23000; that is how Python controls the simulator, and it stays inside the same machine.)
 
-**Step 1: Start CoppeliaSim** (Ubuntu desktop, terminal 1):
+Open the Terminal with **Ctrl + Alt + T**. Open extra tabs with **Ctrl + Shift + T**.
+
+### 9.0 First time only: get the code
 
 ```bash
-coppeliasim
+cd ~
+git clone https://github.com/qai-science/robotics-csAIML-2026.git
+cd ~/robotics-csAIML-2026/experiments/exp07-gas-mapping-robot
+chmod +x run_experiment.sh
 ```
 
-Wait for the window with an empty scene. If a licence or registration dialog appears, close it
-(**its window blocks the Python link until it is closed**).
+(If you have not installed CoppeliaSim and the Python environment yet, do
+[docs/INSTALLATION.md](../../docs/INSTALLATION.md) first.)
 
-**Step 2: Check the link** (terminal 2):
+### 9.1 Option A: one command does everything
 
 ```bash
+cd ~/robotics-csAIML-2026/experiments/exp07-gas-mapping-robot
+./run_experiment.sh
+```
+
+The script prints five stages:
+
+```
+[1/5] CoppeliaSim            starts it (or uses the one already open)
+[2/5] checking the Python link to CoppeliaSim      OK
+[3/5] base station (log: results/gas_log.xlsx)
+[4/5] robot exploring (watch the CoppeliaSim window)
+[5/5] analysis
+Done. Results in .../results
+```
+
+Watch the CoppeliaSim window during stage 4. Then open the results:
+
+```bash
+xdg-open results/gas_log.xlsx
+xdg-open results/fig1_true_gas_field.png
+```
+
+Any robot option can be added, for example `./run_experiment.sh --duration 60`.
+
+### 9.2 Option B: run each part yourself, in three Terminal tabs
+
+Doing it by hand shows how the parts fit together. Use this for the lab record.
+
+**Tab 1: start CoppeliaSim.**
+
+```bash
+cd ~/CoppeliaSim
+LIBGL_ALWAYS_SOFTWARE=1 ./coppeliaSim.sh
+```
+
+`LIBGL_ALWAYS_SOFTWARE=1` makes CoppeliaSim draw on the CPU. Inside VirtualBox this is needed,
+because the virtual 3-D driver crashes it (`vmw_ioctl_command error ... Aborted`). On a PC with a
+real graphics card you can start it with just `./coppeliaSim.sh`. Wait for the window. **If a
+licence or registration dialog appears, close it.** While it is open, CoppeliaSim does not answer Python.
+
+**Tab 2: check the link, then start the base station.**
+
+```bash
+cd ~/robotics-csAIML-2026/experiments/exp07-gas-mapping-robot
+source ~/sim-venv/bin/activate
 python -c "from coppeliasim_zmqremoteapi_client import RemoteAPIClient as R; print(R().require('sim').getSimulationState())"
 ```
 
-It must print `0` (simulation stopped). If it hangs, CoppeliaSim is not open or a dialog is open.
-
-**Step 3: Start the base station** (terminal 2):
+It must print `0`. If it hangs, close the dialog in CoppeliaSim and try again. Then:
 
 ```bash
 python base_station.py
 ```
 
-Expected: `[base] listening on 0.0.0.0:5055, logging to .../results/gas_log.xlsx`.
-Leave it running.
+Expected: `[base] listening on 0.0.0.0:5055, logging to .../results/gas_log.xlsx`. Leave it running.
 
-**Step 4: Start the robot** (terminal 3):
+**Tab 3: start the robot.**
 
 ```bash
+cd ~/robotics-csAIML-2026/experiments/exp07-gas-mapping-robot
+source ~/sim-venv/bin/activate
 python gas_explorer.py
 ```
 
-Expected sequence:
+What you should see:
 
-1. `[robot] building the scene ...`: in CoppeliaSim the room, the green CH₄ cloud, the purple CO₂
-   cloud, two coloured leak discs and the robot with its yellow sensor head appear.
-2. Terminal 2 prints `[base] robot connected from 127.0.0.1:...` and the run information.
-3. The robot drives the lawnmower path for **120 s**. Behind the sensor it lays coloured discs:
-   grey = clean air, green = methane, purple = CO₂.
-4. Every 5 s both terminals print a reading. WARNING and ALARM readings appear in the base-station terminal.
+1. `[robot] building the scene ...`. CoppeliaSim switches to a **top view** of the 5 m × 5 m room:
+   a green dot cloud (CH₄) round the leak at the upper left, a purple dot cloud (CO₂) round the leak
+   at the lower right, two coloured leak discs, and the robot with its yellow sensor head at the
+   bottom-left corner.
+2. Tab 2 prints `[base] robot connected from 127.0.0.1:...`.
+3. The robot sweeps the room back and forth for **120 s of simulated time**. Behind the sensor it lays
+   discs that show what it measured: grey = clean air, green = methane, purple = CO₂.
+4. Every 5 s both tabs print a reading. WARNING and ALARM readings appear in Tab 2.
 
-**Step 5: Watch the Excel file grow** (optional, during the run). Open
-`results/gas_log.xlsx` in LibreOffice Calc, and reopen it to see new rows. It is saved every second.
-Status cells are coloured green (NORMAL), yellow (WARNING) and red (ALARM).
+Every simulation step is drawn, so the motion is smooth. On a slow PC or VM the 120 s run then
+takes a little longer in real time, about 140–170 s on our VirtualBox VM. The time column in the
+Excel file is always simulation time. To force true real time instead (the view then updates less
+often), use `python gas_explorer.py --view realtime`.
 
-**Step 6: Finish.** After 120 s the robot prints
-`[robot] done: 601 readings in 120.0 s simulated / ... s wall clock`, and the base station
-prints `run finished: 601 readings saved` and adds the **Summary** and **Charts** sheets.
+**Tab 4 (optional): watch the Excel file grow during the run.**
 
-**Step 7: Analyse:**
+```bash
+cd ~/robotics-csAIML-2026/experiments/exp07-gas-mapping-robot
+libreoffice --calc results/gas_log.xlsx
+```
+
+Close and reopen it to see new rows; the base station saves it every second. Status cells are
+green (NORMAL), yellow (WARNING) or red (ALARM). Do not save the file from LibreOffice during the run.
+
+**Finish.** The robot prints `[robot] done: 601 readings in 120.0 s simulated ...`. Tab 2 prints
+`run finished: 601 readings saved` and stops; it has added the **Summary** and **Charts** sheets.
+
+**Analyse** (Tab 2 or 3):
 
 ```bash
 python analyse.py
+xdg-open results/fig5_measured_vs_true.png
 ```
 
 This writes six figures and `results/summary.json`.
 
-**Step 8: Record observations** in the table in section 10.
+**Run again.** CoppeliaSim can stay open. Repeat Tab 2 (`python base_station.py`) and Tab 3
+(`python gas_explorer.py`). To keep the old results, log the new run to its own file:
+`python base_station.py --out results/run2.xlsx`.
 
-**Step 9: Compare with the hypotheses** and write the discussion and conclusion (sections 13–14).
+**Stop everything.** Press **Ctrl + C** in any tab still running, and close CoppeliaSim.
 
-**Step 10: Do the practice exercises** in section 16.
+### 9.3 After the run
+
+1. **Record observations** in the table in section 10.
+2. **Compare with the hypotheses** and write the discussion and conclusion (sections 13–14).
+3. **Do the practice exercises** in section 16.
 
 ### Running the base station on a different computer (optional)
 
@@ -253,6 +323,8 @@ Use that PC's IP, and allow TCP port 5055 in its firewall.
 | `python gas_explorer.py --duration 60` | shorter run |
 | `python gas_explorer.py --ideal-sensors` | no lag or noise, for comparison |
 | `python gas_explorer.py --fast` | as fast as possible, not tied to real time |
+| `python gas_explorer.py --view realtime` | keep exactly to the wall clock; the view updates only when there is time |
+| `python gas_explorer.py --cloud-style spheres` | translucent 3-D gas spheres (nicer, but slow to draw on a VM) |
 | `python gas_explorer.py --sample-period 0.5` | 2 readings per second |
 | `python base_station.py --out results/run2.xlsx` | log a second run to a separate file |
 
@@ -393,10 +465,13 @@ results table. Save each run to its own file with `python base_station.py --out 
 - Always start **CoppeliaSim first, then the base station, then the robot**.
 - If the robot prints `waiting for base station`, start `base_station.py`, or check the IP and port.
 - If nothing happens after `building the scene`, look for a dialog box in CoppeliaSim and close it.
+- If CoppeliaSim disappears during a run and the terminal shows `vmw_ioctl_command error ... Aborted`,
+  the VirtualBox 3-D driver crashed. Start CoppeliaSim with `LIBGL_ALWAYS_SOFTWARE=1 ./coppeliaSim.sh` (section 9.2).
+- If the animation gets slower the longer CoppeliaSim has been open, close it and start it again.
 - If `Address already in use` appears, an old base station is still running: `pkill -f base_station.py`.
 - Do not open and **save** `gas_log.xlsx` in Excel while the base station is writing it. Viewing is fine.
-- On a slow PC the 3-D view refreshes only 2–3 times per second during the run. This is
-  intentional: the robot skips redrawing to keep physics and logging in real time. The data are unaffected.
+- With `--view realtime` on a slow PC the view refreshes only a few times per second. This is intentional:
+  drawing is skipped to keep physics and logging on the wall clock. The data are unaffected.
 
 ## 18. References
 

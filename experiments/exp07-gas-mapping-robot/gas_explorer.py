@@ -67,17 +67,25 @@ def wall(sim, size, pos):
     return h
 
 
-def draw_clouds(sim, n_points):
-    """Each gas as translucent spheres: point density and opacity both follow concentration."""
+def draw_clouds(sim, n_points, style='points'):
+    """Each gas as a coloured cloud whose point density follows the concentration.
+
+    style 'points' : flat 6-pixel dots, cheap to draw (default, keeps the animation smooth)
+    style 'spheres': translucent 3-D spheres whose opacity also follows concentration (nicer, slower)
+    """
     handles = []
     for gas, seed in (('CH4', 11), ('CO2', 22)):
         pts = gf.sample_cloud(gas, n_points, seed=seed)
         peak = gf.SOURCES[gas]['peak']
-        d = sim.addDrawingObject(sim.drawing_spherepts + sim.drawing_itemcolors + sim.drawing_itemtransparency,
-                                 0.045, 0, -1, n_points + 10, None)
-        for x, y, z, c in pts:
-            alpha = 0.15 + 0.75 * min(c / peak, 1.0)       # 0 = invisible, 1 = solid
-            sim.addDrawingObjectItem(d, [x, y, z, *gf.COLOR[gas], 1 - alpha])
+        if style == 'spheres':
+            d = sim.addDrawingObject(sim.drawing_spherepts + sim.drawing_itemcolors + sim.drawing_itemtransparency,
+                                     0.045, 0, -1, n_points + 10, None)
+            for x, y, z, c in pts:
+                alpha = 0.15 + 0.75 * min(c / peak, 1.0)       # 0 = invisible, 1 = solid
+                sim.addDrawingObjectItem(d, [x, y, z, *gf.COLOR[gas], 1 - alpha])
+        else:
+            d = sim.addDrawingObject(sim.drawing_points, 6, 0, -1, n_points + 10, list(gf.COLOR[gas]))
+            sim.addDrawingObjectItem(d, [c for x, y, z, _ in pts for c in (x, y, z)])
         handles.append(d)
         # mark the leak itself
         s = gf.SOURCES[gas]
@@ -90,13 +98,21 @@ def draw_clouds(sim, n_points):
     return handles
 
 
-def build_scene(sim, n_points):
+def top_view(sim, height=6.2):
+    """Point the main view's camera straight down at the room, so the whole run is visible."""
+    cam = sim.getObject('/DefaultCamera')
+    # camera looks along its +z axis: z -> world down, image up -> world +y
+    sim.setObjectMatrix(cam, -1, [-1, 0, 0, 0, 0, 1, 0, 0, 0, 0, -1, height])
+
+
+def build_scene(sim, n_points, style='points'):
     sim.closeScene()
     half, t = gf.ARENA / 2, 0.08
     for pos, size in [([0, half, 0.25], [gf.ARENA, t, 0.5]), ([0, -half, 0.25], [gf.ARENA, t, 0.5]),
                       ([half, 0, 0.25], [t, gf.ARENA, 0.5]), ([-half, 0, 0.25], [t, gf.ARENA, 0.5])]:
         wall(sim, size, pos)
-    draw_clouds(sim, n_points)
+    draw_clouds(sim, n_points, style)
+    top_view(sim)
 
     robot = sim.loadModel(model_path())
     sim.removeObjects([sim.getObject('/PioneerP3DX/Script')])
@@ -142,6 +158,11 @@ def main():
     ap.add_argument('--ideal-sensors', action='store_true', help='no lag, no noise (for comparison)')
     ap.add_argument('--fast', action='store_true', help='run as fast as possible instead of real time')
     ap.add_argument('--cloud-points', type=int, default=2500, help='points drawn per gas cloud')
+    ap.add_argument('--cloud-style', choices=['points', 'spheres'], default='points',
+                    help='points = light and fast (default); spheres = translucent 3-D, slower to draw')
+    ap.add_argument('--view', choices=['smooth', 'realtime'], default='smooth',
+                    help='smooth = draw every step (the run may take longer than --duration on a slow PC); '
+                         'realtime = keep to the wall clock and skip drawing frames when behind')
     ap.add_argument('--truth-out', default=os.path.join(HERE, 'results', 'robot_truth.csv'))
     args = ap.parse_args()
     os.makedirs(os.path.dirname(args.truth_out), exist_ok=True)
@@ -152,7 +173,7 @@ def main():
         while sim.getSimulationState() != sim.simulation_stopped:
             time.sleep(0.05)
     print('[robot] building the scene ...', flush=True)
-    robot, head = build_scene(sim, args.cloud_points)
+    robot, head = build_scene(sim, args.cloud_points, args.cloud_style)
     left = sim.getObject('/PioneerP3DX/leftMotor')
     right = sim.getObject('/PioneerP3DX/rightMotor')
     trail = sim.addDrawingObject(sim.drawing_discpts + sim.drawing_itemcolors, 0.09, 0, -1, 100000, None)
@@ -221,11 +242,11 @@ def main():
                 print(f'[robot] t={t:6.1f}s ({hx:+.2f},{hy:+.2f})  CH4={meas["CH4"]:6.0f}  CO2={meas["CO2"]:6.0f} ppm',
                       flush=True)
 
-        # Real-time pacing. Drawing the 3-D view is by far the slowest part of a step on a VM,
-        # so a frame is rendered only when the simulation is ahead of the wall clock (or at least
-        # every max_skip steps); physics, sensing and data logging still run at every step.
+        # Drawing the 3-D view is by far the slowest part of a step on a VM. In 'smooth' mode every
+        # step is drawn. In 'realtime' mode a frame is drawn only when the simulation is ahead of the
+        # wall clock (or at least every max_skip steps); physics, sensing and logging always run.
         ahead = (step + 1) * dt - (time.time() - wall0)
-        render = (ahead > 0 and not args.fast) or since_render >= max_skip
+        render = args.view == 'smooth' or (ahead > 0 and not args.fast) or since_render >= max_skip
         if render != rendering:
             sim.setBoolParam(sim.boolparam_display_enabled, render)
             rendering = render

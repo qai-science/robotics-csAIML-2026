@@ -84,10 +84,14 @@ wget https://downloads.coppeliarobotics.com/V4_10_0_rev0/CoppeliaSim_Edu_V4_10_0
 tar -xf CoppeliaSim_Edu_V4_10_0_rev0_Ubuntu24_04.tar.xz
 mv CoppeliaSim_Edu_V4_10_0_rev0_Ubuntu24_04 ~/CoppeliaSim
 rm CoppeliaSim_Edu_V4_10_0_rev0_Ubuntu24_04.tar.xz
-echo 'alias coppeliasim="~/CoppeliaSim/coppeliaSim.sh"' >> ~/.bashrc
+echo 'alias coppeliasim="LIBGL_ALWAYS_SOFTWARE=1 ~/CoppeliaSim/coppeliaSim.sh"' >> ~/.bashrc
 echo 'export COPPELIASIM_ROOT="$HOME/CoppeliaSim"' >> ~/.bashrc
 source ~/.bashrc
 ```
+
+`LIBGL_ALWAYS_SOFTWARE=1` in the alias makes CoppeliaSim draw with the CPU (Mesa llvmpipe). In a
+VirtualBox VM this is required: the virtual 3-D driver crashes CoppeliaSim with
+`vmw_ioctl_command error ... Aborted`. On a PC with a real graphics card you may remove it.
 
 Use the `Ubuntu22_04` file instead on Ubuntu 22.04. On Ubuntu 26.04 the 24.04 build works.
 Newer versions are listed at <https://www.coppeliarobotics.com/>; if you use one, change the version
