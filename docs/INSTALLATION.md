@@ -144,13 +144,13 @@ git clone https://github.com/qai-science/robotics-csAIML-2026.git
 cd robotics-csAIML-2026
 ```
 
-Each experiment folder has a `README.md` with the full procedure. Experiment 01 is in
-`experiments/exp01-gas-mapping-robot/`.
+Each experiment folder has a `README.md` with the full procedure. Experiment 07 is in
+`experiments/exp07-gas-mapping-robot/`.
 
 ### 6.1 Five-minute self-test of the whole chain
 
 ```bash
-cd ~/robotics-csAIML-2026/experiments/exp01-gas-mapping-robot
+cd ~/robotics-csAIML-2026/experiments/exp07-gas-mapping-robot
 source ~/sim-venv/bin/activate
 python base_station.py --out /tmp/selftest.xlsx &
 python gas_explorer.py --duration 10 --fast --truth-out /tmp/selftest_truth.csv

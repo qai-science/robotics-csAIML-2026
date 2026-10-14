@@ -1,4 +1,4 @@
-# Experiment 01 — Mobile Gas-Mapping Robot with Real-Time Telemetry to a Base Station
+# Experiment 07 — Mobile Gas-Mapping Robot with Real-Time Telemetry to a Base Station
 
 **Course:** Robotics Lab, CSE (AI & ML), 2026 batch
 **Software:** CoppeliaSim 4.10 Edu, Python 3 (ZMQ Remote API, openpyxl, matplotlib)
@@ -169,7 +169,7 @@ separate base station.
 ## 9. Procedure — step by step
 
 > Run every command from this folder:
-> `cd ~/robotics-csAIML-2026/experiments/exp01-gas-mapping-robot`
+> `cd ~/robotics-csAIML-2026/experiments/exp07-gas-mapping-robot`
 > and activate the environment first: `source ~/sim-venv/bin/activate`
 
 **Step 1: Start CoppeliaSim** (Ubuntu desktop, terminal 1):

@@ -13,13 +13,13 @@ conclusion, viva questions and practice exercises.
 
 | # | Experiment | Concepts | Time |
 |---|---|---|---|
-| 01 | [Mobile gas-mapping robot with real-time telemetry to a base station](experiments/exp01-gas-mapping-robot/) | gas plumes (CH₄ vs CO₂), sensor dynamics, coverage path, go-to-goal control, TCP telemetry, live Excel logging, map reconstruction, alarm reliability | 2 h |
+| 07 | [Mobile gas-mapping robot with real-time telemetry to a base station](experiments/exp07-gas-mapping-robot/) | gas plumes (CH₄ vs CO₂), sensor dynamics, coverage path, go-to-goal control, TCP telemetry, live Excel logging, map reconstruction, alarm reliability | 2 h |
 
-![Experiment 01](experiments/exp01-gas-mapping-robot/results/fig1_true_gas_field.png)
+![Experiment 07](experiments/exp07-gas-mapping-robot/results/fig1_true_gas_field.png)
 
 ## Quick start (after installation)
 
-Open three terminals in `experiments/exp01-gas-mapping-robot` and run `source ~/sim-venv/bin/activate` in each.
+Open three terminals in `experiments/exp07-gas-mapping-robot` and run `source ~/sim-venv/bin/activate` in each.
 
 ```bash
 coppeliasim                  # terminal 1: the simulator (close any licence dialog)
@@ -55,7 +55,7 @@ robotics-csAIML-2026/
 ├── LICENSE                         MIT
 ├── docs/INSTALLATION.md            installation guide + troubleshooting
 └── experiments/
-    └── exp01-gas-mapping-robot/
+    └── exp07-gas-mapping-robot/
         ├── README.md               full lab manual (start here for the experiment)
         ├── gas_field.py            gas plume + gas sensor models
         ├── base_station.py         TCP server -> live Excel log
