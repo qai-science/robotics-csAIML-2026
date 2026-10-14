@@ -16,7 +16,8 @@ conclusion, viva questions and practice exercises.
 | 06 | [Webots robotics simulations: e-puck swarm and Pioneer lidar navigation](experiments/exp06-webots-robotics-sim/) (uses **Webots R2025a**, see its [GUIDE](experiments/exp06-webots-robotics-sim/GUIDE.md)) | Braitenberg swarm obstacle avoidance, supervisor logging, arena coverage, lidar follow-the-gap navigation, parameter sweeps | — |
 | 07 | [Mobile gas-mapping robot with real-time telemetry to a base station](experiments/exp07-gas-mapping-robot/) | gas plumes (CH₄ vs CO₂), sensor dynamics, coverage path, go-to-goal control, TCP telemetry, live Excel logging, map reconstruction, alarm reliability | 2 h |
 
-![Experiment 07](experiments/exp07-gas-mapping-robot/results/fig1_true_gas_field.png)
+![Experiment 07 in CoppeliaSim](experiments/exp07-gas-mapping-robot/results/coppeliasim_screenshot.png)
+*Experiment 07 in CoppeliaSim: the gas-sensing robot crossing the methane (green) cloud; CO₂ (purple) at the lower right.*
 
 ## Quick start (after installation)
 

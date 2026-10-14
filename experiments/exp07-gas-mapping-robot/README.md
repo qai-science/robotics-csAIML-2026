@@ -4,7 +4,8 @@
 **Software:** CoppeliaSim 4.10 Edu, Python 3 (ZMQ Remote API, openpyxl, matplotlib)
 **Duration:** about 2 hours (30 min setup, 2 min run, 60 min analysis and write-up)
 
-![Gas field and robot path](results/fig1_true_gas_field.png)
+![CoppeliaSim during a run](results/coppeliasim_screenshot.png)
+*CoppeliaSim during a run (top view, t ≈ 55 s): the robot is crossing the green methane cloud; the purple CO₂ cloud is at the lower right; the trail of small balls behind the robot shows what it measured (grey = clean air, purple = CO₂).*
 
 ---
 
@@ -263,13 +264,15 @@ What you should see:
    bottom-left corner.
 2. Tab 2 prints `[base] robot connected from 127.0.0.1:...`.
 3. The robot sweeps the room back and forth for **120 s of simulated time**. Behind the sensor it lays
-   discs that show what it measured: grey = clean air, green = methane, purple = CO₂.
+   small coloured balls that show what it measured: grey = clean air, green = methane, purple = CO₂.
 4. Every 5 s both tabs print a reading. WARNING and ALARM readings appear in Tab 2.
 
-Every simulation step is drawn, so the motion is smooth. On a slow PC or VM the 120 s run then
-takes a little longer in real time, about 140–170 s on our VirtualBox VM. The time column in the
-Excel file is always simulation time. To force true real time instead (the view then updates less
-often), use `python gas_explorer.py --view realtime`.
+Building the scene takes about 10 s (the 5 000 cloud points are added one by one). After that every
+simulation step is drawn, so the motion is smooth. On our VirtualBox VM (8 cores, software rendering)
+the full run kept real time: 120.0 s simulated in 120.1 s, with all 2 401 steps drawn. On a slower PC
+the run may take a little longer than 120 s; the time column in the Excel file is always simulation
+time. To keep strictly to the wall clock instead (the view then updates less often), use
+`python gas_explorer.py --view realtime`.
 
 **Tab 4 (optional): watch the Excel file grow during the run.**
 
@@ -468,6 +471,9 @@ results table. Save each run to its own file with `python base_station.py --out 
 - If CoppeliaSim disappears during a run and the terminal shows `vmw_ioctl_command error ... Aborted`,
   the VirtualBox 3-D driver crashed. Start CoppeliaSim with `LIBGL_ALWAYS_SOFTWARE=1 ./coppeliaSim.sh` (section 9.2).
 - If the animation gets slower the longer CoppeliaSim has been open, close it and start it again.
+  (`gas_explorer.py` clears old clouds and trails at the start of every run, so this should not happen.)
+- If CoppeliaSim is open but the robot never prints `building the scene`, its Python link did not
+  start, which happens when it is restarted too quickly after closing. Close it, wait 5 s, and start it again.
 - If `Address already in use` appears, an old base station is still running: `pkill -f base_station.py`.
 - Do not open and **save** `gas_log.xlsx` in Excel while the base station is writing it. Viewing is fine.
 - With `--view realtime` on a slow PC the view refreshes only a few times per second. This is intentional:

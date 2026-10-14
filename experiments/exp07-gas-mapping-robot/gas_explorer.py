@@ -7,7 +7,7 @@ What it does, in order:
   3. Connects to the base station over TCP.
   4. Drives a lawnmower (back-and-forth) sweep with a go-to-goal controller for --duration seconds,
      paced to real time. Every --sample-period seconds it reads both sensors and sends one JSON line.
-  5. Leaves a trail of coloured discs on the floor showing what was measured where.
+  5. Leaves a trail of small coloured balls just above the floor showing what was measured where.
 
 The sensors are modelled in gas_field.py (lag, noise, resolution, range). The true value at
 each sample is also saved locally (results/robot_truth.csv) so the analysis can judge the
@@ -70,7 +70,7 @@ def wall(sim, size, pos):
 def draw_clouds(sim, n_points, style='points'):
     """Each gas as a coloured cloud whose point density follows the concentration.
 
-    style 'points' : flat 6-pixel dots, cheap to draw (default, keeps the animation smooth)
+    style 'points' : flat 5-pixel dots, almost free to draw (default, keeps every frame in real time)
     style 'spheres': translucent 3-D spheres whose opacity also follows concentration (nicer, slower)
     """
     handles = []
@@ -84,8 +84,9 @@ def draw_clouds(sim, n_points, style='points'):
                 alpha = 0.15 + 0.75 * min(c / peak, 1.0)       # 0 = invisible, 1 = solid
                 sim.addDrawingObjectItem(d, [x, y, z, *gf.COLOR[gas], 1 - alpha])
         else:
-            d = sim.addDrawingObject(sim.drawing_points, 6, 0, -1, n_points + 10, list(gf.COLOR[gas]))
-            sim.addDrawingObjectItem(d, [c for x, y, z, _ in pts for c in (x, y, z)])
+            d = sim.addDrawingObject(sim.drawing_points, 5, 0, -1, n_points + 10, list(gf.COLOR[gas]))
+            for x, y, z, _ in pts:                     # one call per point (a combined list draws nothing)
+                sim.addDrawingObjectItem(d, [x, y, z])
         handles.append(d)
         # mark the leak itself
         s = gf.SOURCES[gas]
@@ -103,10 +104,14 @@ def top_view(sim, height=6.2):
     cam = sim.getObject('/DefaultCamera')
     # camera looks along its +z axis: z -> world down, image up -> world +y
     sim.setObjectMatrix(cam, -1, [-1, 0, 0, 0, 0, 1, 0, 0, 0, 0, -1, height])
+    sim.setBoolParam(sim.boolparam_infotext_visible, False)   # hide the text overlay that covers the room
 
 
 def build_scene(sim, n_points, style='points'):
     sim.closeScene()
+    # Drawing objects made from Python survive closeScene(); clear them, or every run adds another
+    # cloud and trail to the session and CoppeliaSim gets slower each time.
+    sim.removeDrawingObject(sim.handle_all)
     half, t = gf.ARENA / 2, 0.08
     for pos, size in [([0, half, 0.25], [gf.ARENA, t, 0.5]), ([0, -half, 0.25], [gf.ARENA, t, 0.5]),
                       ([half, 0, 0.25], [t, gf.ARENA, 0.5]), ([-half, 0, 0.25], [t, gf.ARENA, 0.5])]:
@@ -132,6 +137,7 @@ def build_scene(sim, n_points, style='points'):
     sim.setObjectParent(head, mast, True)
     sim.setObjectParent(mast, robot, True)
     sim.setObjectAlias(head, 'gasSensorHead')
+    sim.removeObjectFromSelection(sim.handle_all)   # no selection outline or info overlay
     return robot, head
 
 
@@ -176,7 +182,8 @@ def main():
     robot, head = build_scene(sim, args.cloud_points, args.cloud_style)
     left = sim.getObject('/PioneerP3DX/leftMotor')
     right = sim.getObject('/PioneerP3DX/rightMotor')
-    trail = sim.addDrawingObject(sim.drawing_discpts + sim.drawing_itemcolors, 0.09, 0, -1, 100000, None)
+    # trail of small coloured balls just above the floor, one per reading
+    trail = sim.addDrawingObject(sim.drawing_spherepts + sim.drawing_itemcolors, 0.07, 0, -1, 100000, None)
 
     link = connect(args.base_host, args.base_port)
     sensors = {g: gf.GasSensor(g, seed=k, ideal=args.ideal_sensors) for k, g in enumerate(('CH4', 'CO2'))}
@@ -237,7 +244,7 @@ def main():
             base = 0.85
             col = [base * (1 - a - b + a * b) + a * gf.COLOR['CH4'][i] + b * gf.COLOR['CO2'][i] for i in range(3)]
             col = [min(max(c, 0.0), 1.0) for c in col]
-            sim.addDrawingObjectItem(trail, [hx, hy, 0.003, *col])
+            sim.addDrawingObjectItem(trail, [hx, hy, 0.04, *col])
             if n % 25 == 0:
                 print(f'[robot] t={t:6.1f}s ({hx:+.2f},{hy:+.2f})  CH4={meas["CH4"]:6.0f}  CO2={meas["CO2"]:6.0f} ppm',
                       flush=True)
