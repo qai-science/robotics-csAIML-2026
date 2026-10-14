@@ -1,0 +1,41 @@
+#VRML_SIM R2025a utf8
+
+EXTERNPROTO "https://raw.githubusercontent.com/cyberbotics/webots/R2025a/projects/objects/backgrounds/protos/TexturedBackground.proto"
+EXTERNPROTO "https://raw.githubusercontent.com/cyberbotics/webots/R2025a/projects/objects/backgrounds/protos/TexturedBackgroundLight.proto"
+EXTERNPROTO "https://raw.githubusercontent.com/cyberbotics/webots/R2025a/projects/objects/floors/protos/RectangleArena.proto"
+EXTERNPROTO "https://raw.githubusercontent.com/cyberbotics/webots/R2025a/projects/robots/gctronic/e-puck/protos/E-puck.proto"
+EXTERNPROTO "https://raw.githubusercontent.com/cyberbotics/webots/R2025a/projects/objects/factory/containers/protos/WoodenBox.proto"
+EXTERNPROTO "https://raw.githubusercontent.com/cyberbotics/webots/R2025a/projects/objects/obstacles/protos/OilBarrel.proto"
+
+WorldInfo {
+  info [ "Five e-pucks running a Braitenberg obstacle-avoidance controller; a supervisor logs trajectories." ]
+  title "e-puck swarm arena"
+  basicTimeStep 32
+}
+Viewpoint {
+  orientation -0.5774 0.5774 0.5774 2.0944
+  position 0 0 3.2
+}
+TexturedBackground {
+}
+TexturedBackgroundLight {
+}
+RectangleArena {
+  floorSize 1.6 1.6
+  wallHeight 0.08
+}
+WoodenBox { translation 0.3 0.25 0.05 name "box1" size 0.1 0.1 0.1 }
+WoodenBox { translation -0.35 -0.2 0.05 rotation 0 0 1 0.6 name "box2" size 0.15 0.08 0.1 }
+WoodenBox { translation -0.25 0.4 0.05 name "box3" size 0.08 0.2 0.1 }
+OilBarrel { translation 0.35 -0.35 0.044 name "barrel1" height 0.088 radius 0.04 }
+OilBarrel { translation 0 0 0.044 name "barrel2" height 0.088 radius 0.05 }
+DEF EPUCK1 E-puck { translation 0.6 0.6 0 rotation 0 0 1 3.9 name "e-puck1" controller "epuck_braitenberg" }
+DEF EPUCK2 E-puck { translation -0.6 0.6 0 rotation 0 0 1 -0.8 name "e-puck2" controller "epuck_braitenberg" }
+DEF EPUCK3 E-puck { translation -0.6 -0.6 0 rotation 0 0 1 0.8 name "e-puck3" controller "epuck_braitenberg" }
+DEF EPUCK4 E-puck { translation 0.6 -0.6 0 rotation 0 0 1 2.3 name "e-puck4" controller "epuck_braitenberg" }
+DEF EPUCK5 E-puck { translation 0.15 0.6 0 rotation 0 0 1 -1.6 name "e-puck5" controller "epuck_braitenberg" }
+Robot {
+  name "logger"
+  supervisor TRUE
+  controller "trajectory_logger"
+}

@@ -1,7 +1,7 @@
 # Robotics Lab — CSE (AI & ML), 2026 Batch
 
-Simulation experiments for the Robotics course, built on **CoppeliaSim 4.10** and controlled from
-**Python**. Each experiment is a complete lab record: aim, theory, requirements, hypotheses,
+Simulation experiments for the Robotics course, built on **CoppeliaSim 4.10** or **Webots R2025a**
+and controlled from **Python**. Each experiment is a complete lab record: aim, theory, requirements, hypotheses,
 step-by-step procedure, the code that runs it, **real results produced by that code**, discussion,
 conclusion, viva questions and practice exercises.
 
@@ -13,6 +13,7 @@ conclusion, viva questions and practice exercises.
 
 | # | Experiment | Concepts | Time |
 |---|---|---|---|
+| 06 | [Webots robotics simulations: e-puck swarm and Pioneer lidar navigation](experiments/exp06-webots-robotics-sim/) (uses **Webots R2025a**, see its [GUIDE](experiments/exp06-webots-robotics-sim/GUIDE.md)) | Braitenberg swarm obstacle avoidance, supervisor logging, arena coverage, lidar follow-the-gap navigation, parameter sweeps | — |
 | 07 | [Mobile gas-mapping robot with real-time telemetry to a base station](experiments/exp07-gas-mapping-robot/) | gas plumes (CH₄ vs CO₂), sensor dynamics, coverage path, go-to-goal control, TCP telemetry, live Excel logging, map reconstruction, alarm reliability | 2 h |
 
 ![Experiment 07](experiments/exp07-gas-mapping-robot/results/fig1_true_gas_field.png)
@@ -55,6 +56,7 @@ robotics-csAIML-2026/
 ├── LICENSE                         MIT
 ├── docs/INSTALLATION.md            installation guide + troubleshooting
 └── experiments/
+    ├── exp06-webots-robotics-sim/  Webots R2025a: e-puck swarm + Pioneer lidar (own README + GUIDE)
     └── exp07-gas-mapping-robot/
         ├── README.md               full lab manual (start here for the experiment)
         ├── gas_field.py            gas plume + gas sensor models

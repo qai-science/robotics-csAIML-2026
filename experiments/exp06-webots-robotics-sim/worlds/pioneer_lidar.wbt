@@ -1,0 +1,103 @@
+#VRML_SIM R2025a utf8
+
+EXTERNPROTO "https://raw.githubusercontent.com/cyberbotics/webots/R2025a/projects/objects/backgrounds/protos/TexturedBackground.proto"
+EXTERNPROTO "https://raw.githubusercontent.com/cyberbotics/webots/R2025a/projects/objects/backgrounds/protos/TexturedBackgroundLight.proto"
+EXTERNPROTO "https://raw.githubusercontent.com/cyberbotics/webots/R2025a/projects/objects/floors/protos/RectangleArena.proto"
+EXTERNPROTO "https://raw.githubusercontent.com/cyberbotics/webots/R2025a/projects/robots/adept/pioneer3/protos/Pioneer3dx.proto"
+EXTERNPROTO "https://raw.githubusercontent.com/cyberbotics/webots/R2025a/projects/devices/sick/protos/SickLms291.proto"
+EXTERNPROTO "https://raw.githubusercontent.com/cyberbotics/webots/R2025a/projects/objects/factory/containers/protos/WoodenBox.proto"
+EXTERNPROTO "https://raw.githubusercontent.com/cyberbotics/webots/R2025a/projects/objects/obstacles/protos/OilBarrel.proto"
+
+WorldInfo {
+  info [
+    "Pioneer 3-DX with a SICK LMS 291 lidar doing follow-the-gap navigation through a cluttered room."
+  ]
+  title "Pioneer lidar navigation"
+}
+Viewpoint {
+  orientation 0.11782414149282514 0.09870650425427477 -0.9881166417480172 1.7635378449774477
+  position 3.649733416141242 8.651535979463866 2.8590893987146058
+}
+TexturedBackground {
+}
+TexturedBackgroundLight {
+}
+RectangleArena {
+  floorSize 8 8
+  floorTileSize 1 1
+  wallHeight 0.6
+}
+WoodenBox {
+  translation 1.5 1 0.3
+  name "crate1"
+}
+WoodenBox {
+  translation -1.8 2.2 0.3
+  name "crate2"
+  size 1.2 0.6 0.6
+}
+WoodenBox {
+  translation -1.2 -1.5 0.3
+  rotation 0 0 1 0.7
+  name "crate3"
+  size 0.6 1 0.6
+}
+WoodenBox {
+  translation 2.4 -2 0.3
+  name "crate4"
+}
+WoodenBox {
+  translation 0 3 0.3
+  name "crate5"
+  size 2 0.4 0.6
+}
+OilBarrel {
+  translation 0.2 -0.4 0.44
+  name "barrel1"
+}
+OilBarrel {
+  translation -2.8 0.2 0.44
+  name "barrel2"
+}
+OilBarrel {
+  translation 3 1.8 0.44
+  name "barrel3"
+}
+OilBarrel {
+  translation 1 -3 0.44
+  name "barrel4"
+}
+DEF PIONEER Pioneer3dx {
+  hidden position_0_0 0.4005552350961237
+  hidden position_0_1 1125.0049876250564
+  hidden position_0_2 1028.8727742041258
+  hidden linearVelocity_0 -0.3498157162554738 0.37829098506727793 -0.0004799553787978477
+  hidden angularVelocity_0 0.011920712740941116 0.002623008680421834 -0.9828802418417694
+  hidden rotation_1 0.7297436342135353 -0.48346367102532983 -0.4834636564660611 1.880771571084288
+  hidden position_1_0 -2690.975564303183
+  hidden linearVelocity_1 -0.4585815696039553 0.3018717701578554 -0.0019325448516782123
+  hidden angularVelocity_1 -0.010160938198857548 0.034440598684258666 -2.1346268699963575
+  hidden rotation_2 -0.9999999999999999 0 0 1.7722528303200795
+  hidden linearVelocity_2 -0.47301537085794215 0.2877598455856884 -0.0019881148533165797
+  hidden angularVelocity_2 -7.323174224780778 -13.170950721566212 -2.4186016712664196
+  hidden rotation_4 -0.5065611673084767 0.5065611560087053 0.6977045069355633 4.359960155423617
+  hidden linearVelocity_4 -0.39326733237008293 0.5471628162741757 -0.0005258711509638193
+  hidden angularVelocity_4 -5.563711523012274 -3.998207710315187 -1.0553659930218373
+  hidden rotation_9 0.707106698745981 -0.7071067405231579 -0.0004172472599909888 3.1407580754652336
+  hidden linearVelocity_9 -0.2063834259218552 0.2810008216309966 0.0009514983674374011
+  hidden angularVelocity_9 -2.9169263365929643 -2.08279241715273 -1.0020994231202378
+  translation -2.587035567266869 -2.428081605483733 0.09487102310537349
+  rotation -0.016852023588106127 0.009686489966361013 -0.9998110727598077 -2.1708948203565805
+  controller "pioneer_lidar_nav"
+  extensionSlot [
+    SickLms291 {
+      translation 0.136 0 0.059
+    }
+  ]
+}
+Robot {
+  name "logger"
+  supervisor TRUE
+  controller "trajectory_logger"
+  controllerArgs [ "--seconds=180" "--out=analysis/pioneer_trajectory.csv" ]
+}
